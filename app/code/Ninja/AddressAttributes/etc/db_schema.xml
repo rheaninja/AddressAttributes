@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+
+    <!-- Attribute Definitions -->
+    <table name="ninja_address_attribute" resource="default" engine="innodb" comment="Dynamic Address Attribute Definitions">
+        <column xsi:type="int" name="attribute_id" identity="true" nullable="false" unsigned="true" comment="Primary Key"/>
+        <column xsi:type="varchar" name="attribute_code" length="100" nullable="false" comment="Unique code"/>
+        <column xsi:type="varchar" name="label" length="255" nullable="false" comment="Field label"/>
+        <column xsi:type="varchar" name="type" length="50" nullable="false" comment="Input type (text, select, date)"/>
+        <column xsi:type="tinyint" name="is_required" nullable="false" default="0" comment="Is Required"/>
+        <column xsi:type="text" name="options" nullable="true" comment="JSON encoded options for select/radio"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="attribute_id"/>
+        </constraint>
+    </table>
+
+    <!-- Attribute Values -->
+    <table name="ninja_address_attribute_value" resource="default" engine="innodb" comment="Dynamic Address Attribute Values">
+        <column xsi:type="int" name="entity_id" identity="true" nullable="false" unsigned="true" comment="Primary Key"/>
+        <column xsi:type="int" name="parent_id" nullable="false" unsigned="true" comment="Quote/Order Address ID"/>
+        <column xsi:type="int" name="attribute_id" nullable="false" unsigned="true" comment="Attribute ID"/>
+        <column xsi:type="text" name="value" nullable="true" comment="Attribute Value"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="NINJA_ADDRESS_VALUE_PARENT_ID" table="ninja_address_attribute_value" column="parent_id" referenceTable="sales_order_address" referenceColumn="entity_id" onDelete="CASCADE"/>
+        <constraint xsi:type="foreign" referenceId="NINJA_ADDRESS_VALUE_ATTRIBUTE_ID" table="ninja_address_attribute_value" column="attribute_id" referenceTable="ninja_address_attribute" referenceColumn="attribute_id" onDelete="CASCADE"/>
+        <index referenceId="NINJA_ADDRESS_VALUE_PARENT_IDX" indexType="btree">
+            <column name="parent_id"/>
+        </index>
+        <index referenceId="NINJA_ADDRESS_VALUE_ATTRIBUTE_IDX" indexType="btree">
+            <column name="attribute_id"/>
+        </index>
+        <constraint xsi:type="unique" referenceId="NINJA_ADDRESS_VALUE_PARENT_ATTRIBUTE_UNQ">
+            <column name="parent_id"/>
+            <column name="attribute_id"/>
+        </constraint>
+    </table>
+
+    <table name="ninja_address_attribute_quote_value" resource="default" engine="innodb" comment="Dynamic Quote Address Attribute Values">
+        <column xsi:type="int" name="entity_id" identity="true" nullable="false" unsigned="true" comment="Primary Key"/>
+        <column xsi:type="int" name="quote_id" nullable="false" unsigned="true" comment="Quote ID"/>
+        <column xsi:type="int" name="attribute_id" nullable="false" unsigned="true" comment="Attribute ID"/>
+        <column xsi:type="text" name="value" nullable="true" comment="Attribute Value"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="NINJA_ADDRESS_QUOTE_VALUE_ATTRIBUTE_ID" table="ninja_address_attribute_quote_value" column="attribute_id" referenceTable="ninja_address_attribute" referenceColumn="attribute_id" onDelete="CASCADE"/>
+        <index referenceId="NINJA_ADDRESS_QUOTE_VALUE_QUOTE_IDX" indexType="btree">
+            <column name="quote_id"/>
+        </index>
+        <index referenceId="NINJA_ADDRESS_QUOTE_VALUE_ATTRIBUTE_IDX" indexType="btree">
+            <column name="attribute_id"/>
+        </index>
+        <constraint xsi:type="unique" referenceId="NINJA_ADDRESS_QUOTE_VALUE_QUOTE_ATTRIBUTE_UNQ">
+            <column name="quote_id"/>
+            <column name="attribute_id"/>
+        </constraint>
+    </table>
+</schema>

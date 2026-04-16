@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Ninja_AddressAttributes::attributes" title="Ninja Tech" translate="title" module="Ninja_AddressAttributes" sortOrder="100" dependsOnModule="Ninja_AddressAttributes" resource="Ninja_AddressAttributes::attributes"/>
+        <add id="Ninja_AddressAttributes::attribute" title="Address Attribute" translate="title" module="Ninja_AddressAttributes" sortOrder="10" parent="Ninja_AddressAttributes::attributes" action="addressattributes/attribute/index" resource="Ninja_AddressAttributes::attribute"/>
+    </menu>
+</config>

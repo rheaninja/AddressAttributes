@@ -1,0 +1,68 @@
+<!--
+/**
+ * Copyright © Ninja. All rights reserved.
+ */
+-->
+<div class="admin-options-grid" data-bind="visible: isOptionsVisible(), css: { '_disabled': disabled }">
+    <div class="admin__control-addon">
+        <button type="button" class="action-add" data-bind="click: addOption, disable: disabled" title="Add new option">
+            <span translate="'Add Option'"></span>
+        </button>
+    </div>
+
+    <div data-bind="visible: getOptions().length === 0" style="padding: 10px 0; color: #666; font-style: italic;">
+        <span translate="'No options added yet. Click &quot;Add Option&quot; to add new options.'"></span>
+    </div>
+
+    <div data-bind="visible: getOptions().length > 0" style="margin-top: 10px;">
+        <table class="admin__table-secondary">
+            <thead>
+                <tr>
+                    <th style="width: 40%;" translate="'Label'"></th>
+                    <th style="width: 40%;" translate="'Value'"></th>
+                    <th style="width: 10%; text-align: center;" translate="'Position'"></th>
+                    <th style="width: 10%; text-align: center;" translate="'Action'"></th>
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: getOptions()">
+                <tr>
+                    <td>
+                        <input type="text"
+                               class="admin__control-text"
+                               placeholder="Option Label"
+                               data-bind="value: label,
+                                          event: {change: function() { $parent.updateOption($index(), 'label', $element.value); }},
+                                          disable: $parent.disabled"/>
+                    </td>
+                    <td>
+                        <input type="text"
+                               class="admin__control-text"
+                               placeholder="Option Value"
+                               data-bind="value: value,
+                                          event: {change: function() { $parent.updateOption($index(), 'value', $element.value); }},
+                                          disable: $parent.disabled"/>
+                    </td>
+                    <td style="text-align: center;">
+                        <input type="number"
+                               class="admin__control-text"
+                               style="width: 70px; text-align: center;"
+                               min="0"
+                               data-bind="value: sort_order,
+                                          event: {change: function() { $parent.updateOption($index(), 'sort_order', $element.value); }},
+                                          disable: $parent.disabled"/>
+                    </td>
+                    <td style="text-align: center;">
+                        <button type="button"
+                                class="action-delete"
+                                data-action="remove_row"
+                                title="Delete this option"
+                                data-bind="click: function() { $parent.removeOption($index()); },
+                                           disable: $parent.disabled">
+                            <span translate="'Delete'">Delete</span>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

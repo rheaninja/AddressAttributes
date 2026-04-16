@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Repository binding -->
+    <preference for="Ninja\AddressAttributes\Api\AttributeRepositoryInterface" type="Ninja\AddressAttributes\Model\AttributeRepository"/>
+
+    <type name="Magento\Checkout\Block\Checkout\LayoutProcessor">
+        <plugin disabled="false" name="ninja_checkout_address_attributes"
+                type="Ninja\AddressAttributes\Plugin\Checkout\LayoutProcessor"/>
+    </type>
+
+    <type name="Magento\Checkout\Model\ShippingInformationManagement">
+        <plugin disabled="false" name="ninja_save_dynamic_address_information" sortOrder="10"
+                type="Ninja\AddressAttributes\Plugin\Checkout\SaveDynamicAddressAttribute"/>
+    </type>
+
+    <type name="Magento\Quote\Model\ShippingAddressManagement">
+        <plugin disabled="false" name="ninja_save_dynamic_attribute" sortOrder="10" type="Ninja\AddressAttributes\Plugin\SaveDynamicAttribute"/>
+    </type>
+
+    <type name="Magento\Sales\Block\Adminhtml\Order\Address\Form">
+        <plugin disabled="false" name="ninja_admin_order_address_dynamic_form"
+                type="Ninja\AddressAttributes\Plugin\Adminhtml\OrderAddressFormPlugin"/>
+    </type>
+
+    <type name="Magento\Sales\Model\Order\Address\Renderer">
+        <plugin disabled="false" name="ninja_admin_order_address_dynamic_renderer"
+                type="Ninja\AddressAttributes\Plugin\Adminhtml\OrderAddressRendererPlugin"/>
+    </type>
+</config>
