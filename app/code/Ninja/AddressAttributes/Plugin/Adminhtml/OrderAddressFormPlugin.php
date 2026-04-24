@@ -38,10 +38,19 @@ class OrderAddressFormPlugin
             }
 
             $type = (string)($meta['type'] ?? 'text');
+            
+            if ($type === 'yesno') {
+               $value = (string)$value === '1' ? '1' : '0';
+            }
+            
             $optionMap = $meta['option_map'] ?? [];
             $elementType = 'text';
 
-            if ($type === 'date') {
+            if ($type === 'textarea') {
+                $elementType = 'textarea'; // ✅ FIX
+            } elseif ($type === 'yesno') {
+                $elementType = 'select';   // ✅ BEST for admin
+            } elseif ($type === 'date') {
                 $elementType = 'date';
             } elseif ($type === 'select') {
                 $elementType = 'select';
@@ -61,16 +70,23 @@ class OrderAddressFormPlugin
                 }
             }
 
+            $fieldConfig = [
+                'name' => $code,
+                'label' => (string)$meta['label'],
+                'title' => (string)$meta['label'],
+                'required' => !empty($meta['is_required']),
+                'value' => $value,
+            ];
+
+            if ($elementType === 'date') {
+                $fieldConfig['date_format'] = 'MM/dd/y'; // display format
+                $fieldConfig['input_format'] = 'yyyy-MM-dd'; // DB format
+            }
+
             $field = $fieldset->addField(
                 $code,
                 $elementType,
-                [
-                    'name' => $code,
-                    'label' => (string)$meta['label'],
-                    'title' => (string)$meta['label'],
-                    'required' => (bool)$meta['is_required'],
-                    'value' => $value,
-                ]
+                $fieldConfig
             );
 
             if (in_array($elementType, ['select', 'radios', 'checkboxes'], true) && is_array($optionMap) && $optionMap) {
@@ -80,6 +96,13 @@ class OrderAddressFormPlugin
                     $values[] = ['value' => (string)$optValue, 'label' => (string)$optLabel];
                 }
                 $field->setValues($values);
+            }
+
+            if ($type === 'yesno') {
+                $field->setValues([
+                    ['value' => '1', 'label' => __('Yes')],
+                    ['value' => '0', 'label' => __('No')],
+                ]);
             }
         }
 

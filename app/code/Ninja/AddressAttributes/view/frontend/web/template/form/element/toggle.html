@@ -1,0 +1,19 @@
+<div class="admin__actions-switch"
+     data-bind="css: {'_checked': value() == '1'}">
+
+    <input type="checkbox"
+           class="admin__actions-switch-checkbox"
+           data-bind="
+               checked: value,
+               checkedValue: '1',
+               uncheckedValue: '0',
+               attr: {
+                   id: uid,
+                   name: inputName
+               }
+           "/>
+
+    <label class="admin__actions-switch-label"
+           data-bind="attr: {for: uid}">
+    </label>
+</div>

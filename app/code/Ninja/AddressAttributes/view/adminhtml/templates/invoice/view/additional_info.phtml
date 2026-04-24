@@ -1,0 +1,25 @@
+<?php
+// app/code/Ninja/AddressAttributes/view/adminhtml/templates/invoice/view/additional_info.phtml
+/** @var \Ninja\AddressAttributes\Block\Adminhtml\Invoice\View\AdditionalInfo $block */
+$items = $block->getAttributeValues();
+if (!$items) return;
+?>
+<div class="admin__page-section">
+    <div class="admin__page-section-title">
+        <span class="title"><?= $block->escapeHtml(__('Additional Information')) ?></span>
+    </div>
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item">
+            <table class="admin__table-secondary">
+                <tbody>
+                <?php foreach ($items as $item): ?>
+                    <tr>
+                        <th><?= $block->escapeHtml($item['label']) ?></th>
+                        <td><strong><?= $block->escapeHtml($item['value']) ?></strong></td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

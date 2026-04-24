@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 namespace Ninja\AddressAttributes\Controller\Adminhtml\Attribute;
 
 use Magento\Framework\App\Action\HttpGetActionInterface;

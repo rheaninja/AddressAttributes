@@ -1,0 +1,33 @@
+<?php
+/** @var \Ninja\AddressAttributes\Block\Adminhtml\Order\View\AdditionalInfo $block */
+$items = array_filter(
+    $block->getAttributeValues(),
+    fn($item) => $item['value'] !== ''
+);
+
+if (!$items) return;
+?>
+<div class="admin__page-section">
+    <div class="admin__page-section-title">
+        <span class="title"><?= $block->escapeHtml(__('Additional Information')) ?></span>
+        <a href="<?= $block->escapeUrl($block->getEditUrl()) ?>"
+           class="action-default scalable"
+           style="margin-left: 15px; font-size: 12px;">
+            <?= $block->escapeHtml(__('Edit')) ?>
+        </a>
+    </div>
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item order-additional-info">
+            <table class="admin__table-secondary">
+                <tbody>
+                <?php foreach ($items as $item): ?>
+                    <tr>
+                        <th><?= $block->escapeHtml($item['label']) ?></th>
+                        <td><strong><?= $block->escapeHtml($item['value']) ?></strong></td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

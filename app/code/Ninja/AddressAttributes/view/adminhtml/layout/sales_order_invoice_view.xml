@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!-- app/code/Ninja/AddressAttributes/view/adminhtml/layout/sales_order_invoice_view.xml -->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="extra_customer_info">
+            <block class="Ninja\AddressAttributes\Block\Adminhtml\Invoice\View\AdditionalInfo"
+                name="ninja.invoice.additional.info"
+                template="Ninja_AddressAttributes::invoice/view/additional_info.phtml"/>
+        </referenceContainer>
+    </body>
+</page>

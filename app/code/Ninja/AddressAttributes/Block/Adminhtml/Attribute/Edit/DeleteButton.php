@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 namespace Ninja\AddressAttributes\Block\Adminhtml\Attribute\Edit;
 
 use Magento\Framework\View\Element\UiComponent\Control\ButtonProviderInterface;

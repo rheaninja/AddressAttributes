@@ -9,7 +9,16 @@
         <column xsi:type="varchar" name="label" length="255" nullable="false" comment="Field label"/>
         <column xsi:type="varchar" name="type" length="50" nullable="false" comment="Input type (text, select, date)"/>
         <column xsi:type="tinyint" name="is_required" nullable="false" default="0" comment="Is Required"/>
+        <column xsi:type="int" name="min_length" nullable="true" comment="Minimum Length"/>
+        <column xsi:type="int" name="max_length" nullable="true" comment="Maximum Length"/>
         <column xsi:type="text" name="options" nullable="true" comment="JSON encoded options for select/radio"/>
+        <column xsi:type="int" name="sort_order" nullable="false" default="0" comment="Sort Order"/>
+        <column xsi:type="varchar" name="position" length="50" nullable="false" default="after_shipping_address" comment="Display Position"/>
+        <column xsi:type="smallint" name="show_in_grid" nullable="false" default="0" comment="Show in Order Grid"/>
+        <column xsi:type="smallint" name="show_in_shipping_address" nullable="false" default="0" comment="Show in Shipping Address"/>
+        <column xsi:type="smallint" name="show_in_additional_info" nullable="false" default="0" comment="Show in Additional Info"/>
+        <column xsi:type="smallint" name="show_in_invoice" nullable="false" default="0" comment="Show in Admin Invoice"/>
+        <column xsi:type="smallint" name="show_in_invoice_pdf" nullable="false" default="0" comment="Show in Invoice PDF"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="attribute_id"/>
         </constraint>
@@ -57,5 +66,32 @@
             <column name="quote_id"/>
             <column name="attribute_id"/>
         </constraint>
+    </table>
+
+    <table name="ninja_address_attribute_store" resource="default" engine="innodb" comment="Dynamic Address Attribute Store Association">
+        <column xsi:type="int" name="attribute_id" nullable="false" unsigned="true" comment="Attribute ID"/>
+        <column xsi:type="smallint" name="store_id" nullable="false" unsigned="true" comment="Store ID"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="attribute_id"/>
+            <column name="store_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="NINJA_ADDRESS_ATTR_STORE_ATTRIBUTE_ID"
+                    table="ninja_address_attribute_store"
+                    column="attribute_id"
+                    referenceTable="ninja_address_attribute"
+                    referenceColumn="attribute_id"
+                    onDelete="CASCADE"/>
+        <constraint xsi:type="foreign" referenceId="NINJA_ADDRESS_ATTR_STORE_STORE_ID"
+                    table="ninja_address_attribute_store"
+                    column="store_id"
+                    referenceTable="store"
+                    referenceColumn="store_id"
+                    onDelete="CASCADE"/>
+        <index referenceId="NINJA_ADDRESS_ATTR_STORE_ATTRIBUTE_IDX" indexType="btree">
+            <column name="attribute_id"/>
+        </index>
+        <index referenceId="NINJA_ADDRESS_ATTR_STORE_STORE_IDX" indexType="btree">
+            <column name="store_id"/>
+        </index>
     </table>
 </schema>

@@ -127,6 +127,59 @@
             </settings>
         </field>
 
+        <field name="min_length" sortOrder="36" formElement="input">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="source" xsi:type="string">attribute</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Minimum Length</label>
+                <dataScope>min_length</dataScope>
+
+                <validation>
+                    <rule name="validate-digits" xsi:type="boolean">true</rule>
+                </validation>
+
+                <tooltip>
+                    <description translate="true">
+                        Minimum number of characters required. Only applies to Text fields.
+                    </description>
+                </tooltip>
+
+                <imports>
+                    <link name="visible">${ $.provider }:data.type == 'text'</link>
+                </imports>
+            </settings>
+        </field>
+
+        <field name="max_length" sortOrder="38" formElement="input">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="source" xsi:type="string">attribute</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Maximum Length</label>
+                <dataScope>max_length</dataScope>
+                <validation>
+                    <rule name="validate-digits" xsi:type="boolean">true</rule>
+                </validation>
+
+                <tooltip>
+                    <description translate="true">
+                        Maximum number of characters required. Only applies to Text fields.
+                    </description>
+                </tooltip>
+
+                <imports>
+                    <link name="visible">${ $.provider }:data.type == 'text'</link>
+                </imports>
+            </settings>
+        </field>
+
         <field name="is_required" sortOrder="40" formElement="checkbox">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
@@ -151,6 +204,199 @@
                 </checkbox>
             </formElements>
         </field>
+        <field name="sort_order" sortOrder="45" formElement="input">
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Sort Order</label>
+                <dataScope>sort_order</dataScope>
+            </settings>
+        </field>
+        <field name="position" sortOrder="46" formElement="select">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="source" xsi:type="string">attribute</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Display Position</label>
+                <dataScope>position</dataScope>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="Ninja\AddressAttributes\Model\Attribute\PositionOptions"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+
+        <!-- ✅ NEW: Show in Order Grid toggle -->
+        <field name="show_in_grid" sortOrder="47" formElement="checkbox">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="source" xsi:type="string">attribute</item>
+                    <item name="default" xsi:type="number">0</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>boolean</dataType>
+                <label translate="true">Show in Order Grid</label>
+                <dataScope>show_in_grid</dataScope>
+                <tooltip>
+                    <description translate="true">If enabled, this attribute value will appear as a column in the Admin Order Grid.</description>
+                </tooltip>
+            </settings>
+            <formElements>
+                <checkbox>
+                    <settings>
+                        <valueMap>
+                            <map name="false" xsi:type="number">0</map>
+                            <map name="true" xsi:type="number">1</map>
+                        </valueMap>
+                        <prefer>toggle</prefer>
+                    </settings>
+                </checkbox>
+            </formElements>
+        </field>
+
+        <!-- Show in Shipping Address -->
+        <field name="show_in_shipping_address" sortOrder="48" formElement="checkbox">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="source" xsi:type="string">attribute</item>
+                    <item name="default" xsi:type="number">0</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>boolean</dataType>
+                <label translate="true">Show in Shipping Address</label>
+                <dataScope>show_in_shipping_address</dataScope>
+                <tooltip>
+                    <description translate="true">If enabled, this attribute value will appear in the Shipping Address section on the order detail page.</description>
+                </tooltip>
+            </settings>
+            <formElements>
+                <checkbox>
+                    <settings>
+                        <valueMap>
+                            <map name="false" xsi:type="number">0</map>
+                            <map name="true" xsi:type="number">1</map>
+                        </valueMap>
+                        <prefer>toggle</prefer>
+                    </settings>
+                </checkbox>
+            </formElements>
+        </field>
+
+        <!-- Show in Additional Info -->
+        <field name="show_in_additional_info" sortOrder="49" formElement="checkbox">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="source" xsi:type="string">attribute</item>
+                    <item name="default" xsi:type="number">0</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>boolean</dataType>
+                <label translate="true">Show in Additional Info</label>
+                <dataScope>show_in_additional_info</dataScope>
+                <tooltip>
+                    <description translate="true">If enabled, this attribute value will appear in the Additional Information section on the order detail page.</description>
+                </tooltip>
+            </settings>
+            <formElements>
+                <checkbox>
+                    <settings>
+                        <valueMap>
+                            <map name="false" xsi:type="number">0</map>
+                            <map name="true" xsi:type="number">1</map>
+                        </valueMap>
+                        <prefer>toggle</prefer>
+                    </settings>
+                </checkbox>
+            </formElements>
+        </field>
+        <field name="show_in_invoice" sortOrder="50" formElement="checkbox">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="source" xsi:type="string">attribute</item>
+                    <item name="default" xsi:type="number">0</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>boolean</dataType>
+                <label translate="true">Show in Admin Invoice</label>
+                <dataScope>show_in_invoice</dataScope>
+                <tooltip>
+                    <description translate="true">If enabled, this attribute value will appear in the admin invoice detail page.</description>
+                </tooltip>
+            </settings>
+            <formElements>
+                <checkbox>
+                    <settings>
+                        <valueMap>
+                            <map name="false" xsi:type="number">0</map>
+                            <map name="true" xsi:type="number">1</map>
+                        </valueMap>
+                        <prefer>toggle</prefer>
+                    </settings>
+                </checkbox>
+            </formElements>
+        </field>
+
+        <!-- Show in Invoice PDF -->
+        <field name="show_in_invoice_pdf" sortOrder="51" formElement="checkbox">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="source" xsi:type="string">attribute</item>
+                    <item name="default" xsi:type="number">0</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>boolean</dataType>
+                <label translate="true">Show in Invoice PDF</label>
+                <dataScope>show_in_invoice_pdf</dataScope>
+                <tooltip>
+                    <description translate="true">If enabled, this attribute value will appear in the generated invoice PDF.</description>
+                </tooltip>
+            </settings>
+            <formElements>
+                <checkbox>
+                    <settings>
+                        <valueMap>
+                            <map name="false" xsi:type="number">0</map>
+                            <map name="true" xsi:type="number">1</map>
+                        </valueMap>
+                        <prefer>toggle</prefer>
+                    </settings>
+                </checkbox>
+            </formElements>
+        </field>
+
+        <field name="store_ids" sortOrder="52" formElement="multiselect">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="source" xsi:type="string">attribute</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Store View</label>
+                <dataScope>store_ids</dataScope>
+                <tooltip>
+                    <description translate="true">Select store views where this attribute will appear on checkout. Leave empty to show on all stores.</description>
+                </tooltip>
+            </settings>
+            <formElements>
+                <multiselect>
+                    <settings>
+                        <options class="Ninja\AddressAttributes\Model\Attribute\StoreOptions"/>
+                    </settings>
+                </multiselect>
+            </formElements>
+        </field>
+        
     </fieldset>
 
 </form>

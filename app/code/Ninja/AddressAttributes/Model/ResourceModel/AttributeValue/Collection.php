@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 namespace Ninja\AddressAttributes\Model\ResourceModel\AttributeValue;
 
 use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;

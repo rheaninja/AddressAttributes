@@ -26,4 +26,49 @@
         <plugin disabled="false" name="ninja_admin_order_address_dynamic_renderer"
                 type="Ninja\AddressAttributes\Plugin\Adminhtml\OrderAddressRendererPlugin"/>
     </type>
+
+    <type name="Magento\Checkout\Model\PaymentInformationManagement">
+        <plugin name="ninja_save_dynamic_place_order"
+                type="Ninja\AddressAttributes\Plugin\Checkout\SaveDynamicAttributeOnPlaceOrder"
+                sortOrder="10"/>
+    </type>
+
+    <!-- guest -->
+    <type name="Magento\Checkout\Model\GuestPaymentInformationManagement">
+        <plugin name="ninja_save_dynamic_place_order_guest"
+                type="Ninja\AddressAttributes\Plugin\Checkout\SaveDynamicAttributeOnPlaceOrderGuest"
+                sortOrder="10"/>
+    </type>
+
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="sales_order_grid_data_source" xsi:type="string">
+                    Ninja\AddressAttributes\Model\ResourceModel\Order\Grid\Collection
+                </item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\Sales\Model\ResourceModel\Order">
+        <plugin name="ninja_sync_order_grid"
+            type="Ninja\AddressAttributes\Plugin\Order\SyncOrderGrid"
+            sortOrder="20"/>
+    </type>
+
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
+        <plugin name="ninja_add_order_grid_columns"
+            type="Ninja\AddressAttributes\Plugin\Ui\AddOrderGridColumns"
+            sortOrder="10"/>
+    </type>
+
+    <virtualType name="NinjaAttributeValueColumn"
+             type="Ninja\AddressAttributes\Ui\Component\Listing\Column\AttributeValue">
+    </virtualType>
+
+    <type name="Magento\Sales\Model\Order\Pdf\Invoice">
+        <plugin name="ninja_invoice_pdf_attributes"
+            type="Ninja\AddressAttributes\Plugin\Pdf\InvoicePlugin"
+            sortOrder="10"/>
+    </type>
 </config>

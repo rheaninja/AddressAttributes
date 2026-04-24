@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 namespace Ninja\AddressAttributes\Model\Attribute;
 
 use Magento\Framework\Data\OptionSourceInterface;
@@ -12,7 +13,9 @@ class TypeOptions implements OptionSourceInterface
             ['value' => 'select', 'label' => __('Select')],
             ['value' => 'radio', 'label' => __('Radio')],
             ['value' => 'checkbox', 'label' => __('Checkbox')],
-            ['value' => 'date', 'label' => __('Date')]
+            ['value' => 'date', 'label' => __('Date')],
+            ['value' => 'textarea', 'label' => __('Textarea')],
+            ['value' => 'yesno', 'label' => __('Yes/No')]
         ];
     }
 }

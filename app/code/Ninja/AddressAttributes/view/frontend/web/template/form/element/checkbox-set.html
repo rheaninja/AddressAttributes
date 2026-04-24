@@ -1,0 +1,23 @@
+<div class="control" data-bind="attr: {'id': uid}">
+    <!-- ko foreach: options() -->
+    <!-- ko if: $data.value !== '' -->
+    <div class="field choice">
+        <input type="checkbox"
+               class="checkbox"
+               data-bind="
+                   attr: {
+                       id: $parent.uid + '_' + $data.value,
+                       name: $parent.inputName + '[]',
+                       value: $data.value
+                   },
+                   checked: $parent.isChecked($data.value),
+                   click: function() { $parent.toggleOption($data.value); return true; }
+               "/>
+
+        <label class="label"
+               data-bind="attr: { 'for': $parent.uid + '_' + $data.value }, text: $data.label">
+        </label>
+    </div>
+    <!-- /ko -->
+    <!-- /ko -->
+</div>

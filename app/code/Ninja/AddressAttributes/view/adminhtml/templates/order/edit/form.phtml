@@ -1,0 +1,125 @@
+<?php
+// app/code/Ninja/AddressAttributes/view/adminhtml/templates/order/edit/form.phtml
+/** @var \Ninja\AddressAttributes\Block\Adminhtml\Order\Edit\Form $block */
+$order = $block->getOrder();
+$items = $block->getAttributesWithValues();
+?>
+<div class="admin__page-section">
+    <div class="page-main-actions">
+        <div class="page-main-actions-inner">
+            <a href="<?= $block->escapeUrl($block->getBackUrl()) ?>"
+               class="action-default scalable back">
+                <span><?= $block->escapeHtml(__('Back')) ?></span>
+            </a>
+            <button type="button"
+                    onclick="document.getElementById('ninja-order-attr-form').reset()"
+                    class="action-default scalable">
+                <span><?= $block->escapeHtml(__('Reset')) ?></span>
+            </button>
+            <button type="button"
+                    onclick="document.getElementById('ninja-order-attr-form').submit()"
+                    class="action-primary scalable">
+                <span><?= $block->escapeHtml(__('Save Order Attributes')) ?></span>
+            </button>
+        </div>
+    </div>
+
+    <form id="ninja-order-attr-form"
+          action="<?= $block->escapeUrl($block->getSaveUrl()) ?>"
+          method="post">
+        <?= $block->getBlockHtml('formkey') ?>
+
+        <div class="admin__page-section-title">
+            <span class="title"><?= $block->escapeHtml(__('Order Attributes')) ?></span>
+        </div>
+
+        <fieldset class="admin__fieldset">
+            <?php foreach ($items as $item):
+                /** @var \Ninja\AddressAttributes\Model\Attribute $attribute */
+                $attribute = $item['attribute'];
+                $value     = $item['value'];
+                $code      = $attribute->getAttributeCode();
+                $type      = $attribute->getData('type');
+                $label     = $attribute->getLabel();
+                $options   = json_decode((string)$attribute->getData('options'), true) ?: [];
+                $inputName = 'attributes[' . $block->escapeHtml($code) . ']';
+            ?>
+            <div class="admin__field">
+                <label class="admin__field-label" for="ninja_<?= $block->escapeHtml($code) ?>">
+                    <span><?= $block->escapeHtml($label) ?></span>
+                </label>
+                <div class="admin__field-control">
+
+                    <?php if ($type === 'text'): ?>
+                        <input type="text"
+                               id="ninja_<?= $block->escapeHtml($code) ?>"
+                               name="<?= $block->escapeHtml($inputName) ?>"
+                               value="<?= $block->escapeHtml($value) ?>"
+                               class="admin__control-text"/>
+
+                    <?php elseif ($type === 'textarea'): ?>
+                        <textarea id="ninja_<?= $block->escapeHtml($code) ?>"
+                                  name="<?= $block->escapeHtml($inputName) ?>"
+                                  class="admin__control-textarea"
+                                  rows="3"><?= $block->escapeHtml($value) ?></textarea>
+
+                    <?php elseif ($type === 'date'): ?>
+                        <input type="date"
+                               id="ninja_<?= $block->escapeHtml($code) ?>"
+                               name="<?= $block->escapeHtml($inputName) ?>"
+                               value="<?= $block->escapeHtml($value) ?>"
+                               class="admin__control-text"/>
+
+                    <?php elseif ($type === 'yesno'): ?>
+                        <select id="ninja_<?= $block->escapeHtml($code) ?>"
+                                name="<?= $block->escapeHtml($inputName) ?>"
+                                class="admin__control-select">
+                            <option value="0" <?= $value == '0' ? 'selected' : '' ?>>
+                                <?= $block->escapeHtml(__('No')) ?>
+                            </option>
+                            <option value="1" <?= $value == '1' ? 'selected' : '' ?>>
+                                <?= $block->escapeHtml(__('Yes')) ?>
+                            </option>
+                        </select>
+
+                    <?php elseif ($type === 'select' || $type === 'radio'): ?>
+                        <select id="ninja_<?= $block->escapeHtml($code) ?>"
+                                name="<?= $block->escapeHtml($inputName) ?>"
+                                class="admin__control-select">
+                            <option value=""><?= $block->escapeHtml(__('-- Please Select --')) ?></option>
+                            <?php foreach ($options as $option): ?>
+                                <option value="<?= $block->escapeHtml($option['value'] ?? $option['label']) ?>"
+                                    <?= ($value === ($option['value'] ?? $option['label'])) ? 'selected' : '' ?>>
+                                    <?= $block->escapeHtml($option['label']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+
+                    <?php elseif ($type === 'checkbox'): ?>
+                        <?php
+                        $checkedValues = $value ? explode(',', $value) : [];
+                        ?>
+                        <?php foreach ($options as $option):
+                            $optVal = $option['value'] ?? $option['label'];
+                        ?>
+                            <div class="admin__field admin__field-option">
+                                <input type="checkbox"
+                                       id="ninja_<?= $block->escapeHtml($code . '_' . $optVal) ?>"
+                                       name="<?= $block->escapeHtml($inputName) ?>[]"
+                                       value="<?= $block->escapeHtml($optVal) ?>"
+                                       class="admin__control-checkbox"
+                                    <?= in_array($optVal, $checkedValues) ? 'checked' : '' ?>/>
+                                <label for="ninja_<?= $block->escapeHtml($code . '_' . $optVal) ?>"
+                                       class="admin__field-label">
+                                    <?= $block->escapeHtml($option['label']) ?>
+                                </label>
+                            </div>
+                        <?php endforeach; ?>
+
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </fieldset>
+    </form>
+</div>

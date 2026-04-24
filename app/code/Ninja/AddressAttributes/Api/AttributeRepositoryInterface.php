@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 namespace Ninja\AddressAttributes\Api;
 
 use Ninja\AddressAttributes\Model\Attribute;

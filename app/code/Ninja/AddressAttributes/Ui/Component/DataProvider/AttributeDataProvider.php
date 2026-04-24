@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 namespace Ninja\AddressAttributes\Ui\Component\DataProvider;
 
 use Magento\Ui\DataProvider\AbstractDataProvider;

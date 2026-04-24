@@ -1,83 +1,191 @@
 <?php
+declare(strict_types=1);
 
 namespace Ninja\AddressAttributes\Plugin\Checkout;
 
+use Magento\Store\Model\StoreManagerInterface;
 use Ninja\AddressAttributes\Model\ResourceModel\Attribute\CollectionFactory;
 
 class LayoutProcessor
 {
     protected $collectionFactory;
+    protected $storeManager;
 
     public function __construct(
-        CollectionFactory $collectionFactory
+        CollectionFactory $collectionFactory,
+        StoreManagerInterface $storeManager
     ) {
         $this->collectionFactory = $collectionFactory;
+        $this->storeManager = $storeManager;
     }
 
     public function afterProcess(
         \Magento\Checkout\Block\Checkout\LayoutProcessor $subject,
         array $jsLayout
     ) {
-        $collection = $this->collectionFactory->create();
 
-        $fieldset =& $jsLayout['components']['checkout']['children']['steps']['children']['shipping-step']['children']['shippingAddress']['children']['shipping-address-fieldset']['children'];
+        $storeId    = (int)$this->storeManager->getStore()->getId();
+
+        $collection = $this->collectionFactory->create()
+            ->addStoreFilter($storeId); 
+        
+        // ── Shipping address fieldsets ─────────────────────────────────────────
+        $shippingAddress =& $jsLayout['components']['checkout']['children']['steps']
+            ['children']['shipping-step']['children']['shippingAddress'];
+
+        $addressFieldset =& $shippingAddress['children']['shipping-address-fieldset']['children'];
+
+        if (!isset($shippingAddress['children']['before-shipping-method-form']['children'])) {
+            $shippingAddress['children']['before-shipping-method-form']['children'] = [];
+        }
+        $beforeMethodFieldset =& $shippingAddress['children']['before-shipping-method-form']['children'];
+
+        if (!isset($shippingAddress['children']['after-shipping-method-form'])) {
+            $shippingAddress['children']['after-shipping-method-form'] = [
+                'component'   => 'uiComponent',
+                'displayArea' => 'after-shipping-method-form',
+                'sortOrder'   => 300,
+                'children'    => [],
+            ];
+        }
+        $afterMethodFieldset =& $shippingAddress['children']['after-shipping-method-form']['children'];
+
+        // ── Payment fieldsets (beforeMethods / afterMethods) ───────────────────
+        $payment =& $jsLayout['components']['checkout']['children']['steps']
+            ['children']['billing-step']['children']['payment']['children'];
+
+        if (!isset($payment['beforeMethods']['children'])) {
+            $payment['beforeMethods']['children'] = [];
+        }
+        $beforePaymentFieldset =& $payment['beforeMethods']['children'];
+
+        if (!isset($payment['afterMethods']['children'])) {
+            $payment['afterMethods']['children'] = [];
+        }
+        $afterPaymentFieldset =& $payment['afterMethods']['children'];
 
         foreach ($collection as $attribute) {
 
             $attributeCode = trim($attribute->getAttributeCode());
-
             if (!$attributeCode) {
                 continue;
             }
 
-            // Ensure unique key
             $attributeCode = preg_replace('/[^a-z0-9_]/', '_', strtolower($attributeCode));
-            $type = (string)$attribute->getData('type');
-            $options = $this->buildUiOptions($attribute->getData('options'));
-            $defaultValue = $this->extractDefaultValue($attribute->getData('options'), $type);
+            $type          = (string)$attribute->getData('type');
+            $options       = $this->buildUiOptions($attribute->getData('options'));
+            $defaultValue  = $this->extractDefaultValue($attribute->getData('options'), $type);
 
-            $component = 'Magento_Ui/js/form/element/abstract';
-            $elementTmpl = 'ui/form/element/input';
+            $component     = 'Magento_Ui/js/form/element/abstract';
+            $elementTmpl   = 'ui/form/element/input';
             $configOptions = [];
 
-            if ($type === 'date') {
-                $component = 'Magento_Ui/js/form/element/date';
+            if ($type === 'textarea') {
+                $component   = 'Magento_Ui/js/form/element/textarea';
+                $elementTmpl = 'ui/form/element/textarea';
+            } elseif ($type === 'yesno') {
+                $component   = 'Magento_Ui/js/form/element/single-checkbox';
+                $elementTmpl = 'Ninja_AddressAttributes/form/element/toggle';
+            } elseif ($type === 'date') {
+                $component   = 'Magento_Ui/js/form/element/date';
                 $elementTmpl = 'ui/form/element/date';
                 $configOptions = [
-                    'options' => [
-                        'dateFormat' => 'yyyy-MM-dd',
-                        'showsTime' => false,
-                    ],
+                    'dateOptions' => [
+                        'dateFormat' => 'MM/dd/y',
+                        'showsTime'  => false,
+                        'minDate'    => 0,
+                        'appendTo'   => 'body',
+                    ]
                 ];
             } elseif ($type === 'select') {
-                $component = 'Magento_Ui/js/form/element/select';
+                $component   = 'Magento_Ui/js/form/element/select';
                 $elementTmpl = 'ui/form/element/select';
             } elseif ($type === 'radio') {
-                $component = 'Magento_Ui/js/form/element/checkbox-set';
-                $elementTmpl = 'ui/form/element/checkbox-set';
+                $component   = 'Ninja_AddressAttributes/js/form/element/radio-set';
+                $elementTmpl = 'Ninja_AddressAttributes/form/element/radio-set';
             } elseif ($type === 'checkbox') {
-                $component = 'Magento_Ui/js/form/element/multiselect';
-                $elementTmpl = 'ui/form/element/multiselect';
+                $component   = 'Ninja_AddressAttributes/js/form/element/checkbox-set';
+                $elementTmpl = 'Ninja_AddressAttributes/form/element/checkbox-set';
             }
 
-            $fieldset[$attributeCode] = [
+            $position  = (string)($attribute->getData('position') ?? 'after_shipping_address');
+            $sortOrder = (int)($attribute->getData('sort_order') ?? 0);
+
+            // ── Payment fields use a different dataScope ───────────────────────
+            $isPaymentPosition = in_array($position, ['before_payment_method', 'after_payment_method']);
+
+            $fieldDefinition = [
                 'component' => $component,
-                'config' => [
-                    'customScope' => 'shippingAddress.custom_attributes',
-                    'template' => 'ui/form/field',
+                'config'    => [
+                    // Payment fields scope differently — they sit outside shippingAddress
+                    'customScope' => $isPaymentPosition
+                        ? 'shippingAddress.custom_attributes'
+                        : 'shippingAddress.custom_attributes',
+                    'template'    => 'ui/form/field',
                     'elementTmpl' => $elementTmpl,
-                ] + $configOptions,
-                'options' => $options ?: [],
-                'value' => $defaultValue,
-                'dataScope' => 'shippingAddress.custom_attributes.' . $attributeCode,
-                'label' => $attribute->getLabel(),
-                'provider' => 'checkoutProvider',
-                'visible' => true,
-                'validation' => [
-                    'required-entry' => (bool)$attribute->getIsRequired()
                 ],
-                'sortOrder' => 200 + (int)$attribute->getId()
+                'options'    => $type === 'date'
+                    ? ($configOptions['dateOptions'] ?? [])
+                    : ($options ?: []),
+                'value'      => $type === 'yesno' ? ($defaultValue ? '1' : '0') : $defaultValue,
+                'dataScope'  => 'shippingAddress.custom_attributes.' . $attributeCode,
+                'label'      => $attribute->getLabel(),
+                'provider'   => 'checkoutProvider',
+                'visible'    => true,
+                'validation' => [
+                    'required-entry' => (bool)$attribute->getIsRequired(),
+                ],
             ];
+
+            if ($type === 'text') {
+                $min = (int)$attribute->getData('min_length');
+                $max = (int)$attribute->getData('max_length');
+
+                if ($min > 0 || $max > 0) {
+                    // Add custom validation rule for length
+                    $fieldDefinition['validation']['min_text_length'] = $min ?: 0;
+                    $fieldDefinition['validation']['max_text_length'] = $max ?: 99999;
+                }
+            }
+            switch ($position) {
+                case 'before_shipping_address':
+                    $fieldDefinition['sortOrder'] = 1 + $sortOrder;
+                    $addressFieldset[$attributeCode] = $fieldDefinition;
+                    break;
+
+                case 'after_shipping_address':
+                    $fieldDefinition['sortOrder'] = 200 + $sortOrder;
+                    $addressFieldset[$attributeCode] = $fieldDefinition;
+                    break;
+
+                case 'before_shipping_method':
+                    $fieldDefinition['sortOrder'] = 1 + $sortOrder;
+                    $beforeMethodFieldset[$attributeCode] = $fieldDefinition;
+                    break;
+
+                case 'after_shipping_method':
+                    $fieldDefinition['sortOrder'] = 1 + $sortOrder;
+                    $afterMethodFieldset[$attributeCode] = $fieldDefinition;
+                    break;
+
+                case 'before_payment_method':
+                    $fieldDefinition['sortOrder'] = 1 + $sortOrder;
+                    $fieldDefinition['config']['customScope'] = 'customAttributes';
+                    $fieldDefinition['dataScope']             = 'customAttributes.' . $attributeCode;
+                    $beforePaymentFieldset[$attributeCode]    = $fieldDefinition;
+                    break;
+
+                case 'after_payment_method':
+                    $fieldDefinition['sortOrder'] = 1 + $sortOrder;
+                    $fieldDefinition['config']['customScope'] = 'customAttributes';
+                    $fieldDefinition['dataScope']             = 'customAttributes.' . $attributeCode;
+                    $afterPaymentFieldset[$attributeCode]     = $fieldDefinition;
+                    break;
+                    
+                default:
+                    $fieldDefinition['sortOrder'] = 200 + $sortOrder;
+                    $addressFieldset[$attributeCode] = $fieldDefinition;
+            }
         }
 
         return $jsLayout;
@@ -103,6 +211,9 @@ class LayoutProcessor
         }
 
         $result = [];
+
+        // Add the placeholder only once, before iterating options
+        $result = [['value' => '', 'label' => __('-- Please Select --')]];
         
         foreach ($rawOptions as $row) {
             if (!is_array($row)) {
@@ -119,8 +230,12 @@ class LayoutProcessor
             if ($label === '') {
                 $label = $value;
             }
-            $result[] = ['value' => '', 'label' => '-- Please Select --'];
             $result[] = ['value' => $value, 'label' => $label];
+        }
+
+        // If only the placeholder was added (no real options), return empty
+        if (count($result) === 1) {
+            return [];
         }
 
         return $result;

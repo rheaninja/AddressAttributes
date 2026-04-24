@@ -104,7 +104,6 @@ class SaveDynamicAddressAttribute
             $shippingAddress->setData((string)$code, $value);
         }
 
-        $this->debugToFile($quoteId, $dynamicFields);
         $this->dynamicFieldStorage->saveQuoteValues($quoteId, $dynamicFields);
     }
 
@@ -181,23 +180,5 @@ class SaveDynamicAddressAttribute
 
         $mask = $this->quoteIdMaskFactory->create()->load($cartId, 'masked_id');
         return (int)$mask->getQuoteId();
-    }
-
-    /**
-     * Best-effort debug log for checkout integration.
-     *
-     * @param array<string, scalar|null> $dynamicFields
-     */
-    private function debugToFile(int $quoteId, array $dynamicFields): void
-    {
-        try {
-            $writer = new \Zend_Log_Writer_Stream(BP . '/var/log/addressattribute.log');
-            $logger = new \Zend_Log();
-            $logger->addWriter($writer);
-            $logger->info('dynamic_fields captured for quote_id=' . $quoteId);
-            $logger->info('dynamic_fields=' . print_r($dynamicFields, true));
-        } catch (\Throwable $e) {
-            // Never break checkout due to logging issues.
-        }
     }
 }

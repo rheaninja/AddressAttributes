@@ -29,14 +29,34 @@ class OrderAddressRendererPlugin
             return $result;
         }
 
-        $map = $this->dynamicFieldStorage->getAttributeMap();
+        // ✅ Only attributes with show_in_shipping_address = 1
+        $map = $this->dynamicFieldStorage->getAttributeMap(['show_in_shipping_address' => 1]);
+        if (!$map) {
+            return $result;
+        }
+
         $separator = $type === 'html' ? '<br/>' : PHP_EOL;
-        $lines = [];
+        $lines     = [];
+
         foreach ($map as $code => $meta) {
-            if (!isset($values[$code]) || $values[$code] === '') {
+            if (!array_key_exists($code, $values)) {
                 continue;
             }
-            $display = $this->dynamicFieldStorage->resolveDisplayValue($code, (string)$values[$code]);
+
+            $value = $values[$code];
+
+            if ($value === null || $value === '') {
+                continue;
+            }
+
+            $fieldType = (string)($meta['type'] ?? 'text');
+
+            if ($fieldType === 'yesno') {
+                $display = $value === '1' ? (string)__('Yes') : (string)__('No');
+            } else {
+                $display = $this->dynamicFieldStorage->resolveDisplayValue($code, $value);
+            }
+
             $lines[] = (string)$meta['label'] . ': ' . $display;
         }
 

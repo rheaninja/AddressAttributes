@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 namespace Ninja\AddressAttributes\Model;
 
 use Magento\Framework\Model\AbstractModel;

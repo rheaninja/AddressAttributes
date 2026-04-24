@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!-- app/code/Ninja/AddressAttributes/view/adminhtml/layout/addressattributes_order_edit.xml -->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <update handle="sales_default"/>
+    <body>
+        <referenceContainer name="content">
+            <block class="Ninja\AddressAttributes\Block\Adminhtml\Order\Edit\Form"
+                   name="ninja.order.edit.form"
+                   template="Ninja_AddressAttributes::order/edit/form.phtml"/>
+        </referenceContainer>
+    </body>
+</page>

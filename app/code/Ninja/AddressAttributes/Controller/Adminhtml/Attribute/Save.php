@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 namespace Ninja\AddressAttributes\Controller\Adminhtml\Attribute;
 
 use Magento\Framework\App\Action\HttpPostActionInterface;
@@ -9,67 +10,43 @@ use Ninja\AddressAttributes\Model\AttributeFactory;
 use Magento\Framework\App\Request\DataPersistorInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Registry;
+use Magento\Framework\App\ResourceConnection;
 
-/**
- * Save Attribute action.
- */
 class Save extends Action implements HttpPostActionInterface
 {
-    /**
-     * @var DataPersistorInterface
-     */
     protected $dataPersistor;
-
-    /**
-     * @var AttributeFactory
-     */
     protected $attributeFactory;
-
-    /**
-     * @var AttributeRepositoryInterface
-     */
     protected $attributeRepository;
+    private ResourceConnection $resourceConnection;
 
-    /**
-     * @param Context $context
-     * @param Registry $coreRegistry
-     * @param DataPersistorInterface $dataPersistor
-     * @param AttributeFactory $attributeFactory
-     * @param AttributeRepositoryInterface $attributeRepository
-     */
     public function __construct(
         Context $context,
         Registry $coreRegistry,
         DataPersistorInterface $dataPersistor,
         AttributeFactory $attributeFactory,
-        AttributeRepositoryInterface $attributeRepository
+        AttributeRepositoryInterface $attributeRepository,
+        ResourceConnection $resourceConnection
     ) {
-        $this->dataPersistor = $dataPersistor;
-        $this->attributeFactory = $attributeFactory;
+        $this->dataPersistor       = $dataPersistor;
+        $this->attributeFactory    = $attributeFactory;
         $this->attributeRepository = $attributeRepository;
+        $this->resourceConnection  = $resourceConnection;
         parent::__construct($context);
     }
 
-    /**
-     * Save action
-     *
-     * @return \Magento\Framework\Controller\ResultInterface
-     */
     public function execute()
     {
-        /** @var \Magento\Backend\Model\View\Result\Redirect $resultRedirect */
         $resultRedirect = $this->resultRedirectFactory->create();
-        $data = $this->getRequest()->getPostValue();
-        
+        $data           = $this->getRequest()->getPostValue();
+
         if ($data) {
             if (empty($data['attribute_id'])) {
                 $data['attribute_id'] = null;
             }
 
-            /** @var \Ninja\AddressAttributes\Model\Attribute $model */
             $model = $this->attributeFactory->create();
+            $id    = $this->getRequest()->getParam('attribute_id');
 
-            $id = $this->getRequest()->getParam('attribute_id');
             if ($id) {
                 try {
                     $model = $this->attributeRepository->getById($id);
@@ -79,32 +56,70 @@ class Save extends Action implements HttpPostActionInterface
                 }
             }
 
+            // ✅ Extract store_ids before setData to handle separately
+            $storeIds = $data['store_ids'] ?? [];
+            unset($data['store_ids']); // don't save to main attribute table
+
             $model->setData($data);
 
             try {
                 $this->attributeRepository->save($model);
+
+                // ✅ Save store associations
+                $this->saveAttributeStores((int)$model->getId(), $storeIds);
+
                 $this->messageManager->addSuccessMessage(__('You saved the attribute.'));
                 $this->dataPersistor->clear('address_attribute');
                 return $resultRedirect->setPath('*/*/');
+
             } catch (LocalizedException $e) {
                 $this->messageManager->addErrorMessage($e->getMessage());
             } catch (\Exception $e) {
-                $this->messageManager->addExceptionMessage($e, __('Something went wrong while saving the attribute.'));
+                $this->messageManager->addExceptionMessage(
+                    $e,
+                    __('Something went wrong while saving the attribute.')
+                );
             }
 
             $this->dataPersistor->set('address_attribute', $data);
             return $resultRedirect->setPath('*/*/edit', ['attribute_id' => $id]);
         }
-        
+
         return $resultRedirect->setPath('*/*/');
     }
 
-    /**
-     * ACL check
-     *
-     * @return bool
-     */
-    protected function _isAllowed()
+    private function saveAttributeStores(int $attributeId, mixed $storeIds): void
+    {
+        $connection = $this->resourceConnection->getConnection();
+        $table      = $this->resourceConnection->getTableName('ninja_address_attribute_store');
+
+        // Delete existing store associations
+        $connection->delete($table, ['attribute_id = ?' => $attributeId]);
+
+        // Normalize store_ids — could be array or comma string
+        if (is_string($storeIds)) {
+            $storeIds = explode(',', $storeIds);
+        }
+
+        $storeIds = array_values(array_filter(
+            array_map('intval', (array)$storeIds)
+        ));
+
+        // ✅ If empty or contains store_id 0 = all stores — save nothing
+        // (no rows = show on all stores)
+        if (empty($storeIds) || in_array(0, $storeIds)) {
+            return;
+        }
+
+        $rows = array_map(fn($storeId) => [
+            'attribute_id' => $attributeId,
+            'store_id'     => $storeId,
+        ], $storeIds);
+
+        $connection->insertMultiple($table, $rows);
+    }
+
+    protected function _isAllowed(): bool
     {
         return $this->_authorization->isAllowed('Ninja_AddressAttributes::attributes');
     }
